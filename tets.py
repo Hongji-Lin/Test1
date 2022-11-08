@@ -9,17 +9,19 @@ from random import random
 
 import cv2
 import numpy as np
-from torchvision.transforms import transforms, RandomErasing
+import torch.cuda
+from torchvision.transforms import transforms
 from cutout import Cutout
 
-
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 '''
 缩放
 '''
-# 放大缩小
-def Scale(image, scale):
-    return cv2.resize(image,None,fx=scale,fy=scale,interpolation=cv2.INTER_LINEAR)
+# # 放大缩小
+# def Scale(image, scale):
+#     return cv2.resize(image,None,fx=scale,fy=scale,interpolation=cv2.INTER_LINEAR)
 
 
 # 颜色噪声变化 = HSV + 噪声 + 模糊
@@ -44,30 +46,28 @@ def augment_hsv(im, hgain=0.5, sgain=0.5, vgain=0.5):
 
 # 变暗
 def Darker(image,percetage=0.5):
-    image_copy = image.copy()
     w = image.shape[1]
     h = image.shape[0]
     # get darker
     for xi in range(0,w):
         for xj in range(0,h):
-            image_copy[xj,xi,0] = int(image[xj,xi,0]*percetage)
-            image_copy[xj,xi,1] = int(image[xj,xi,1]*percetage)
-            image_copy[xj,xi,2] = int(image[xj,xi,2]*percetage)
-    return image_copy
+            image[xj,xi,0] = int(image[xj,xi,0]*percetage)
+            image[xj,xi,1] = int(image[xj,xi,1]*percetage)
+            image[xj,xi,2] = int(image[xj,xi,2]*percetage)
+    return image
 
 
 # 明亮
 def Brighter(image, percetage=1.5):
-    image_copy = image.copy()
     w = image.shape[1]
     h = image.shape[0]
     # get brighter
     for xi in range(0,w):
         for xj in range(0,h):
-            image_copy[xj,xi,0] = np.clip(int(image[xj,xi,0]*percetage),a_max=255,a_min=0)
-            image_copy[xj,xi,1] = np.clip(int(image[xj,xi,1]*percetage),a_max=255,a_min=0)
-            image_copy[xj,xi,2] = np.clip(int(image[xj,xi,2]*percetage),a_max=255,a_min=0)
-    return image_copy
+            image[xj,xi,0] = np.clip(int(image[xj,xi,0]*percetage),a_max=255,a_min=0)
+            image[xj,xi,1] = np.clip(int(image[xj,xi,1]*percetage),a_max=255,a_min=0)
+            image[xj,xi,2] = np.clip(int(image[xj,xi,2]*percetage),a_max=255,a_min=0)
+    return image
 
 
 # 高斯噪声
@@ -137,6 +137,7 @@ def augment_cutout(image):
 
 
 def data_aug(img_path, save_img):
+    # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     root_path = "./test/"
     save_path = "./test/"
     img_list = os.listdir(save_path)
@@ -145,10 +146,11 @@ def data_aug(img_path, save_img):
         file_i_path = os.path.join(save_path, file_name)
         print(file_i_path)
         img_i = cv2.imread(file_i_path)
+        # img_i = torch.tensor(img_i).cuda()
 
         print("数据增强开始")
-        # img_hsv = augment_hsv(img_i, hgain=0.5, sgain=0.5, vgain=0.5)
-        # cv2.imwrite(os.path.join(save_path, file_name.split('.')[0] + "_hsv.jpg"),  img_hsv)
+        img_hsv = augment_hsv(img_i, hgain=0.5, sgain=0.5, vgain=0.5)
+        cv2.imwrite(os.path.join(save_path, file_name.split('.')[0] + "_hsv.jpg"),  img_hsv)
 
         img_dark = Darker(img_i)
         cv2.imwrite(os.path.join(save_path, file_name.split('.')[0] + "_dark.jpg"), img_dark)
@@ -162,19 +164,20 @@ def data_aug(img_path, save_img):
         img_blur = gaussian_blur(img_i)
         cv2.imwrite(os.path.join(save_path, file_name.split('.')[0] + "_blur.jpg"), img_blur)
 
-        # img_horizon = Horizontal(img_i)
-        # cv2.imwrite(os.path.join(save_path, file_name.split('.')[0] + "_horizon.jpg"), img_horizon)
+        img_horizon = Horizontal(img_i)
+        cv2.imwrite(os.path.join(save_path, file_name.split('.')[0] + "_horizon.jpg"), img_horizon)
 
-        # img_rotate = Rotate(img_i)
-        # cv2.imwrite(os.path.join(save_path, file_name.split('.')[0] + "_rotate.jpg"), img_rotate)
+        img_rotate = Rotate(img_i)
+        cv2.imwrite(os.path.join(save_path, file_name.split('.')[0] + "_rotate.jpg"), img_rotate)
 
         img_move = Move(img_i, x=120, y=120)
         cv2.imwrite(os.path.join(save_path, file_name.split('.')[0] + "_move.jpg"), img_move)
 
-        # img_cutout = augment_cutout(img_i)
-        # cv2.imwrite(os.path.join(save_path, file_name.split('.')[0] + "_cutout.jpg"), img_cutout)
+        img_cutout = augment_cutout(img_i)
+        cv2.imwrite(os.path.join(save_path, file_name.split('.')[0] + "_cutout.jpg"), img_cutout)
 
         print("{}完成".format(file_name))
+
 
 if __name__ == "__main__":
     img_path = "./test/"
