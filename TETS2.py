@@ -29,7 +29,7 @@ for img in img_list:
 mean = np.mean(full_height)
 std = np.std(full_height)
 print(mean)
-print(var)
+
 print(std)
 
 
