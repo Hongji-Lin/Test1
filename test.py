@@ -107,10 +107,10 @@ def cal_mean():
         img_height.append(h)
         img_width.append(w)
 
-        # for emp_img in empty_list:
-        #     emp_img = cv2.imread((empty_fileDir + emp_img))
-        #     h = emp_img.shape[0]
-        #     w = emp_img.shape[1]
+        for emp_img in empty_list:
+            emp_img = cv2.imread((empty_fileDir + emp_img))
+            h = emp_img.shape[0]
+            w = emp_img.shape[1]
 
         img_height.append(h)
         img_width.append(w)
