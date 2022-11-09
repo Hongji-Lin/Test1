@@ -1,6 +1,6 @@
 # encoding: utf-8
 # @author: Evan
-# @file: tets.py
+# @file: test.py
 # @time: 2022/11/8 11:36
 # @desc: 数据增强测试
 import math
@@ -15,14 +15,6 @@ from cutout import Cutout
 
 import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-
-'''
-缩放
-'''
-# # 放大缩小
-# def Scale(image, scale):
-#     return cv2.resize(image,None,fx=scale,fy=scale,interpolation=cv2.INTER_LINEAR)
-
 
 # 颜色噪声变化 = HSV + 噪声 + 模糊
 # HSV变换
@@ -98,9 +90,15 @@ def gaussian_blur(image):
 
 
 # 空间几何变换
+
+# 放大缩小
+def Scale(image, scale):
+    return cv2.resize(image, None, fx=scale, fy=scale, interpolation=cv2.INTER_LINEAR)
+
+
 # 水平翻转
 def Horizontal(image):
-    return cv2.flip(image,1,dst=None) #水平镜像
+    return cv2.flip(image, 1, dst=None) # 水平镜像
 
 
 # 旋转，R可控制图片放大缩小
@@ -146,7 +144,6 @@ def data_aug(img_path, save_img):
         file_i_path = os.path.join(save_path, file_name)
         print(file_i_path)
         img_i = cv2.imread(file_i_path)
-        # img_i = torch.tensor(img_i).cuda()
 
         print("数据增强开始")
         img_hsv = augment_hsv(img_i, hgain=0.5, sgain=0.5, vgain=0.5)
@@ -185,59 +182,3 @@ if __name__ == "__main__":
     data_aug(img_path, save_path)
 
 
-
-
-
-
-
-
-
-
-
-
-# # 空间几何变换
-# # 随机旋转、平移、缩放、裁剪，错切/非垂直投影 、透视变换（从0开始）
-# def random_affine(image,
-#                    degrees=10,  # 旋转角度
-#                    translate=.1,  # 平移
-#                    scale=.1,  # 缩放
-#                    shear=10,  # 错切/非垂直投影
-#                    perspective=0.0, # 透视变换
-#                    border=(0, 0)):
-#
-#     height = image.shape[0] + border[0] * 2  # shape(h,w,c)
-#     width = image.shape[1] + border[1] * 2
-#
-#     # Center
-#     C = np.eye(3)
-#     C[0, 2] = -image.shape[1] / 2  # x translation (pixels)
-#     C[1, 2] = -image.shape[0] / 2  # y translation (pixels)
-#
-#     # Perspective # 透视变换
-#     # P = np.eye(3)
-#     # P[2, 0] = random.uniform(-perspective, perspective)  # x perspective (about y)
-#     # P[2, 1] = random.uniform(-perspective, perspective)  # y perspective (about x)
-#
-#     # Rotation and Scale 旋转+缩放
-#     R = np.eye(3)
-#     a = random.uniform(-degrees, degrees)
-#     # a += random.choice([-180, -90, 0, 90])  # add 90deg rotations to small rotations
-#     s = random.uniform(1 - scale, 1 + scale)
-#     # s = 2 ** random.uniform(-scale, scale)
-#     R[:2] = cv2.getRotationMatrix2D(angle=a, center=(0, 0), scale=s)
-#
-#     # Shear 错切/非垂直投影
-#     S = np.eye(3)
-#     S[0, 1] = math.tan(random.uniform(-shear, shear) * math.pi / 180)  # x shear (deg)
-#     S[1, 0] = math.tan(random.uniform(-shear, shear) * math.pi / 180)  # y shear (deg)
-#
-#     # Translation 平移
-#     T = np.eye(3)
-#     T[0, 2] = random.uniform(0.5 - translate, 0.5 + translate) * width  # x translation (pixels)
-#     T[1, 2] = random.uniform(0.5 - translate, 0.5 + translate) * height  # y translation (pixels)
-#
-#     # Combined rotation matrix
-#     # 将所有变换矩阵连乘得到最终的变换矩阵
-#     M = T @ S @ R @ C  # order of operations (right to left) is IMPORTANT
-#     image = cv2.warpAffine(image, M[:2], dsize=(width, height), borderValue=(114, 114, 114))
-#     return image
