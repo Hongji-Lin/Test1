@@ -90,10 +90,41 @@ def gaussian_blur(image):
 
 
 # 空间几何变换
-
 # 放大缩小
-def Scale(image, scale):
-    return cv2.resize(image, None, fx=scale, fy=scale, interpolation=cv2.INTER_LINEAR)
+def cal_mean():
+    full_fileDir = "./test/"
+    # empty_fileDir = "./test/"
+    full_list = os.listdir(full_fileDir)
+    # empty_list = os.listdir(empty_fileDir)
+    img_height = []
+    img_width = []
+
+    for full_img in full_list:
+        full_img = cv2.imread((full_fileDir + full_img))
+        h = full_img.shape[0]
+        w = full_img.shape[1]
+
+        img_height.append(h)
+        img_width.append(w)
+
+        # for emp_img in empty_list:
+        #     emp_img = cv2.imread((empty_fileDir + emp_img))
+        #     h = emp_img.shape[0]
+        #     w = emp_img.shape[1]
+
+        img_height.append(h)
+        img_width.append(w)
+
+    h_mean = int(np.mean(img_height))
+    w_mean = int(np.mean(img_width))
+    print(h_mean)
+    print(w_mean)
+    return h_mean, w_mean
+
+
+def Scale(image):
+    h, w = cal_mean()
+    return cv2.resize(image, (w, h), interpolation=cv2.INTER_LINEAR)
 
 
 # 水平翻转
@@ -134,14 +165,10 @@ def augment_cutout(image):
     return img_cutout
 
 
-def data_aug(img_path, save_img):
-    # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    root_path = "./test/"
-    save_path = "./test/"
-    img_list = os.listdir(save_path)
-    print(img_list)
+def data_aug(img_path, save_path):
+    img_list = os.listdir(img_path)
     for file_name in img_list:
-        file_i_path = os.path.join(save_path, file_name)
+        file_i_path = os.path.join(img_path, file_name)
         print(file_i_path)
         img_i = cv2.imread(file_i_path)
 
@@ -161,6 +188,9 @@ def data_aug(img_path, save_img):
         img_blur = gaussian_blur(img_i)
         cv2.imwrite(os.path.join(save_path, file_name.split('.')[0] + "_blur.jpg"), img_blur)
 
+        img_scale = Scale(img_i)
+        cv2.imwrite(os.path.join(save_path, file_name.split('.')[0] + "_scale.jpg"), img_scale)
+
         img_horizon = Horizontal(img_i)
         cv2.imwrite(os.path.join(save_path, file_name.split('.')[0] + "_horizon.jpg"), img_horizon)
 
@@ -178,7 +208,7 @@ def data_aug(img_path, save_img):
 
 if __name__ == "__main__":
     img_path = "./test/"
-    save_path = "./test/"
+    save_path = "./aug_img/"
     data_aug(img_path, save_path)
 
 

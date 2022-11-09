@@ -210,3 +210,4 @@ dmypy.json
 cython_debug/
 .idea/.name
 .idea/vcs.xml
+/aug_img/

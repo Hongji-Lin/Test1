@@ -1,12 +1,16 @@
 # encoding: utf-8
 # @author: Evan/Hongji Lin
-# @file: TETS2.PY
+# @file: TEST2.PY
 # @time: 2022/11/8 21:19
 # @desc:
 import os
 import cv2
 import numpy as np
 import torch
+
+
+
+
 
 img_path = 'test/'
 img_list = os.listdir(img_path)
